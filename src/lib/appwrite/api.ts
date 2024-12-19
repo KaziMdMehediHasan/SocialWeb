@@ -2,9 +2,10 @@ import { INewUser } from "@/types";
 import { account, appwriteConfig, avatars, databases } from "./config";
 import { ID, Query } from "appwrite";
 
+// a new user registration 
 export async function createUserAccount(user: INewUser) {
     try {
-        // creating new account to appwrite
+        // registering a new account to appwrite
         const newAccount = await account.create(
             ID.unique(),
             user.email,
@@ -75,6 +76,15 @@ export const getCurrentUser = async () => {
 
         return currentUser.documents[0];
 
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const signOutAccount = async () => {
+    try {
+        const session = await account.deleteSession('current');
+        return session;
     } catch (error) {
         console.log(error);
     }
