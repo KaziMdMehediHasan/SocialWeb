@@ -42,7 +42,7 @@ export type INewPost = {
 }
 
 export type INavLink = {
-    imgUrl: string;
+    imgURL: string;
     route: string;
     label: string
 }

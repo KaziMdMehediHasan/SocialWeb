@@ -4,7 +4,7 @@ import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations"
 import { useEffect } from "react";
 import { useUserContext } from "@/context/AuthContext";
 
-const TopBar = () => {
+const Topbar = () => {
 
     const { mutate: signOut, isSuccess } = useSignOutAccount();
     const navigate = useNavigate();
@@ -58,4 +58,4 @@ const TopBar = () => {
     )
 }
 
-export default TopBar
+export default Topbar
