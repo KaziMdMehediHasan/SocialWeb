@@ -149,7 +149,9 @@ export const saveNewPostToDB = async (post: INewPost) => {
 
         //getting the file url
 
-        const fileUrl = getFileUrl(uploadedFile.$id);
+        const fileUrl = await getFileUrl(uploadedFile.$id);
+
+        console.log('uploaded file url:', fileUrl);
 
         // if the fileUrl is not available, delete the file from the storage and throw an error
         if (!fileUrl) {

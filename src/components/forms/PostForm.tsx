@@ -9,6 +9,9 @@ import FileUploader from "../shared/FileUploader"
 import { PostValidation } from "@/lib/validation"
 import { Models } from "appwrite"
 import { useCreatePost } from "@/lib/react-query/queriesAndMutations"
+import { useUserContext } from "@/context/AuthContext"
+import { useToast } from "@/hooks/use-toast"
+import { useNavigate } from "react-router-dom"
 
 
 type PostFormProps = {
@@ -18,7 +21,11 @@ type PostFormProps = {
 const PostForm = ({ post }: PostFormProps) => {
     // react query hook
 
-    const { mutateAsync: createPost, isPending: createPostLoading } = useCreatePost();
+    const { mutateAsync: saveNewPostToDB, isPending: createPostLoading } = useCreatePost();
+    const { user } = useUserContext();
+    const { toast } = useToast();
+    const navigate = useNavigate()
+
     // 1. Define your form.
     const form = useForm<z.infer<typeof PostValidation>>({
         resolver: zodResolver(PostValidation),
@@ -31,11 +38,25 @@ const PostForm = ({ post }: PostFormProps) => {
     })
 
     // 2. Define a submit handler.
-    function onSubmit(values: z.infer<typeof PostValidation>) {
+    const onSubmit = async (values: z.infer<typeof PostValidation>) => {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
-        console.log('submit button clicked')
-        console.log(values)
+        console.log('submit button clicked');
+        console.log(values);
+
+        const newPost = await saveNewPostToDB({
+            ...values,
+            userId: user.id,
+        });
+
+        if (!newPost) {
+            toast({
+                title: 'Please try again'
+            })
+        }
+
+        navigate('/');
+
     }
     return (
         <Form {...form}>
