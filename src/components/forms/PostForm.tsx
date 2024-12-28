@@ -39,10 +39,6 @@ const PostForm = ({ post }: PostFormProps) => {
 
     // 2. Define a submit handler.
     const onSubmit = async (values: z.infer<typeof PostValidation>) => {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
-        console.log('submit button clicked');
-        console.log(values);
 
         const newPost = await saveNewPostToDB({
             ...values,
