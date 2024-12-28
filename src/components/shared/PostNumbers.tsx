@@ -22,11 +22,12 @@ const PostNumbers = ({ post, userId }: Props) => {
 
     const { data: currentUser } = useGetCurrentUser();
 
-    const savedPostRecord = currentUser?.save.find((record: Models.Document) => record.post.$id === post.$id);
+    // getting the post that user saved
+    const alreadySavedPost = currentUser?.save.find((savedPost: Models.Document) => savedPost.post.$id === post.$id);
 
     useEffect(() => {
         // setIsSaved(savedPostRecord? true: false);
-        setIsSaved(!!savedPostRecord); // this expression makes a truthy value falsy and falsy value truthy
+        setIsSaved(!!alreadySavedPost); // this expression makes a truthy value falsy and falsy value truthy
     }, [currentUser])
 
 
@@ -47,9 +48,9 @@ const PostNumbers = ({ post, userId }: Props) => {
     const handleSavePost = (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        if (savedPostRecord) {
+        if (alreadySavedPost) {
             setIsSaved(false);
-            deleteSavedPost(savedPostRecord.$id);
+            deleteSavedPost(alreadySavedPost.$id);
 
         } else {
             savePost({ postId: post.$id, userId });
