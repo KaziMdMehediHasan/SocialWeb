@@ -29,6 +29,7 @@ const PostDetails = () => {
                         className="post_details-img"
                     />
                     <div className="post_details-info">
+                        {/* post creator details with time */}
                         <div className="flex-between w-full">
                             <Link to={`/profile/${post?.creator.$id}}`} className="flex items-center gap-3">
                                 <img
