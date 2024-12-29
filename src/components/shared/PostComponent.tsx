@@ -46,6 +46,7 @@ const PostComponent = ({ post }: Props) => {
                     <img src="/assets/icons/edit.svg" alt="edit" width={20} height={20} />
                 </Link>
             </div>
+            {/* post tags, captions and images */}
             <Link to={`/posts/${post.$id}`}>
                 <div className="small-medium lg:base-medium py-5">
                     <p>{post.caption}</p>
