@@ -8,7 +8,7 @@ import { Textarea } from "../ui/textarea"
 import FileUploader from "../shared/FileUploader"
 import { PostValidation } from "@/lib/validation"
 import { Models } from "appwrite"
-import { useCreatePost } from "@/lib/react-query/queriesAndMutations"
+import { useCreatePost, useDeletePost, useUpdatePost } from "@/lib/react-query/queriesAndMutations"
 import { useUserContext } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
@@ -16,12 +16,16 @@ import { useNavigate } from "react-router-dom"
 
 type PostFormProps = {
     post?: Models.Document;
+    action: 'Create' | 'Update';
 }
 
-const PostForm = ({ post }: PostFormProps) => {
+const PostForm = ({ post, action }: PostFormProps) => {
     // react query hook
 
     const { mutateAsync: saveNewPostToDB, isPending: createPostLoading } = useCreatePost();
+    const { mutateAsync: updatePostToDB, isPending: updatePostLoading } = useUpdatePost();
+    const { mutateAsync: deletePost, isPending: deletePostLoading } = useDeletePost();
+
     const { user } = useUserContext();
     const { toast } = useToast();
     const navigate = useNavigate()
@@ -40,6 +44,23 @@ const PostForm = ({ post }: PostFormProps) => {
     // 2. Define a submit handler.
     const onSubmit = async (values: z.infer<typeof PostValidation>) => {
 
+        // updating existing post
+        if (post && action === 'Update') {
+            const updatedPost = await updatePostToDB({
+                ...values,
+                postId: post.$id,
+                imageId: post?.imageId,
+                imageUrl: post?.imageUrl
+            })
+
+            if (!updatedPost) {
+                toast({ title: 'Error updating post. Please try again' });
+            };
+
+            return navigate(`/posts/${post.$id}`);
+        }
+
+        // creating new post
         const newPost = await saveNewPostToDB({
             ...values,
             userId: user.id,
@@ -54,6 +75,9 @@ const PostForm = ({ post }: PostFormProps) => {
         navigate('/');
 
     }
+
+
+    console.log(post?.imageUrl);
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-9 w-full max-w-5xl">
@@ -119,7 +143,10 @@ const PostForm = ({ post }: PostFormProps) => {
                 {/* buttons section */}
                 <div className="flex gap-4 items-center justify-end">
                     <Button type="button" className="shad-button_dark_4">Cancel</Button>
-                    <Button type="submit" className="shad-button_primary whitespace-nowrap">Submit</Button>
+                    <Button disabled={createPostLoading || updatePostLoading} type="submit" className="shad-button_primary whitespace-nowrap">
+                        {createPostLoading || updatePostLoading && 'Loading...'}
+                        {action} Post
+                    </Button>
                 </div>
             </form>
         </Form>

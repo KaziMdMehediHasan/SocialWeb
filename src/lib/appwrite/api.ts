@@ -1,4 +1,4 @@
-import { INewPost, INewUser } from "@/types";
+import { INewPost, INewUser, IUpdatePost } from "@/types";
 import { account, appwriteConfig, avatars, databases, storage } from "./config";
 import { ID, ImageGravity, Query } from "appwrite";
 
@@ -261,5 +261,100 @@ export const deleteSavedPost = async (savedRecordId: string,) => {
         return { status: 'Post unsaved successfully' };
     } catch (error) {
         console.log(error)
+    }
+}
+
+// post details
+
+export const getPostById = async (id: string) => {
+    try {
+        const post = await databases.getDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            id,
+        )
+        return post;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+//update post
+
+
+export const updatePostToDB = async (post: IUpdatePost) => {
+    const hasFileToUpdate = post.file.length > 0;
+    try {
+
+        let image = {
+            imageUrl: post.imageUrl,
+            imageId: post.imageId,
+        }
+
+        if (hasFileToUpdate) {
+            // uploading file to appwrite storage
+            const uploadedFile = await uploadFileToStorage(post.file[0]);
+            if (!uploadedFile) throw Error;
+            //getting the file url
+
+            const fileUrl = await getFileUrl(uploadedFile.$id);
+
+            console.log('uploaded file url:', fileUrl);
+
+            // if the fileUrl is not available, delete the file from the storage and throw an error
+            if (!fileUrl) {
+                await deleteFileFromDB(uploadedFile.$id);
+                throw Error;
+            };
+
+            image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id }
+        }
+
+
+        // converting tags to an array
+
+        const tags = post.tags?.replace(/ /g, "").split(",") || [];
+
+        // create the actual post
+
+        const updatePost = await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            post.postId,
+            {
+                caption: post.caption,
+                imageUrl: image.imageUrl,
+                imageId: image.imageId,
+                location: post.location,
+                tags: tags
+            }
+        );
+
+        // this check ensures that the post is created successfully, if not, delete the file from the storage and throw an error
+        if (!updatePost) {
+            await deleteFileFromDB(post.imageId);
+            throw Error;
+        }
+
+        return updatePost;
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// delete post
+
+export const deletePost = async (postId: string, imageId: string) => {
+    if (!postId || !imageId) throw Error;
+
+    try {
+        await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            postId
+        )
+    } catch (error) {
+        console.log(error);
     }
 }

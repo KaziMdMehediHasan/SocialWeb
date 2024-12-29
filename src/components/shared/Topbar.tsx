@@ -53,7 +53,6 @@ const Topbar = () => {
                     </Link>
                 </div>
             </div>
-            TopBar
         </section >
     )
 }

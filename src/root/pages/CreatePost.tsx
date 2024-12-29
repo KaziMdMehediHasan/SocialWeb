@@ -15,7 +15,7 @@ const CreatePost = () => {
                     </h2>
                 </div>
                 {/* post form */}
-                <PostForm />
+                <PostForm action="Create" />
             </div>
         </div>
     )
